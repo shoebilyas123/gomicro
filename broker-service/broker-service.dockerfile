@@ -1,12 +1,12 @@
 # build the go app
-FROM golang:1.18-alpine as builder
+FROM golang:1.22.3-alpine as builder
 
 RUN mkdir /app
 
 COPY . /app
 WORKDIR /app
 
-RUN CGO_ENABLED=0 go -o brokerApp ./cmd/api
+RUN CGO_ENABLED=0 go build -o brokerApp ./cmd/api
 
 RUN chmod +x /app/brokerApp
 
@@ -18,4 +18,4 @@ WORKDIR /app
 
 COPY --from=builder /app/brokerApp /app/
 
-RUN ["/app/brokerApp"]
+CMD ["/app/brokerApp"]
