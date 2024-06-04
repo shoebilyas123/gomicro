@@ -9,7 +9,7 @@ import (
 
 type Config struct {}
 
-const brokerAddr = "8080"
+const brokerAddr = "80"
 
 func main(){
 	app := Config{};

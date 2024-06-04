@@ -1,26 +1,33 @@
 version: '3'
 
+networks:
+  default:
+    name: gomicro
+
 services:
-  broker-service:
+  brokerservice:
     build:
       context: ./../broker-service
       dockerfile: ./../broker-service/broker-service.dockerfile
     restart: always
     ports:
-      - 8080:8080
+      - 8080:80
     deploy:
       mode: replicated
       replicas: 1
-  auth-svc:
+    hostname: brokersvc
+
+  authsvc:
     build:
       context: ./../auth-svc
       dockerfile: ./../auth-svc/auth-svc.dockerfile
     restart: always
     ports:
-      - 8081:8080
+      - 8081:80
     deploy:
       mode: replicated
       replicas: 1
+    hostname: authsvc
     environment:
       DSN: 'host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5'
 

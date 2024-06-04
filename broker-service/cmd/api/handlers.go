@@ -47,13 +47,13 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 		// Create some JSON that we will send to the auth m-svc
-		requestData, _ := json.MarshalIndent(a, "", "\t");
+		jsonData, _ := json.MarshalIndent(a, "", "\t");
+		
 		// Call the auth-svc
-
-		request, err := http.NewRequest("POST", "http://auth-svc/authenticate", bytes.NewBuffer(requestData));
+		resBody := bytes.NewBuffer(jsonData);
+		request, err := http.NewRequest("POST", "http://authsvc/auth", resBody);
 
 		if err != nil {
 			app.errorJSON(w, err);
@@ -62,30 +62,30 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 		client := &http.Client{}
 		response, err := client.Do(request);
-
+		
 		if err != nil {
 			log.Println("CHECK1")
 			app.errorJSON(w, err);
 			return;
 		}
-
 		defer response.Body.Close();
 
+		
 		// Verify the response from svc and write the appropriate response to the calling client
 		if response.StatusCode == http.StatusUnauthorized {
 			log.Println("CHECK2")
 			app.errorJSON(w, errors.New("invalid credentials"))
 			return;
 			} else if response.StatusCode != http.StatusAccepted {
-
+				
 			log.Println("CHECK3")
-				app.errorJSON(w, errors.New("error callinvalid credentialsing auth service"))
-				return;
-			}
-
+			app.errorJSON(w, errors.New("error calling auth service"))
+			return;
+		}
+		
 		var jsonFromService JSONResponse
 		err = json.NewDecoder(response.Body).Decode(&jsonFromService);
-
+		
 		if err != nil {
 
 			log.Println("CHECK4")

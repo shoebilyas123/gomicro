@@ -3,7 +3,6 @@ package main
 import (
 	"auth-svc/cmd/api/data"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +13,7 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-const webPORT = "8080";
+const webPORT = ":80";
 
 const MaxDBConnTries int = 15;
 const RetryDBConnIn time.Duration = 5;
@@ -38,17 +37,16 @@ func main() {
 		Models: data.New(conn),
 	};
 	srv := &http.Server{
-		Addr: fmt.Sprintf(":%s",webPORT),
+		Addr: webPORT,
 		Handler: app.routes(),
 	}
 
+	log.Printf("Running Server on PORT:%s\n", webPORT);
 	err := srv.ListenAndServe();
 
 	if err != nil {
 		log.Panic(err);
 	}
-
-	log.Println("Auth-SVC running on PORT:%s", webPORT)
 	
 }
 
@@ -71,17 +69,17 @@ func openDB(dsn string) (*sql.DB, error) {
 
 func connectToDB() *sql.DB {
 	dsn := os.Getenv("DSN");
-	var count int = 0;
+	count := 0;
 
 	for {
-		conn, err := openDB(dsn);
+		connection, err := openDB(dsn);
 
 		if err != nil {
 			log.Println("Postgres not ready yet");
 			count++;
 		}	else {
 			log.Println("Successfully connected to Postgres");
-			return conn;
+			return connection;
 		}
 
 		if count > MaxDBConnTries {
@@ -93,4 +91,5 @@ func connectToDB() *sql.DB {
 		time.Sleep(RetryDBConnIn*time.Second);
 		continue;
 	}
+
 }
