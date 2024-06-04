@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
@@ -13,7 +14,7 @@ func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 		Message: "Hit the broker server :) !!!",
 	}
 
-
+	log.Printf("BROKER: %T\n", payload);
 	_ = app.writeJSON(w, http.StatusOK, payload);
 }
 
@@ -29,8 +30,10 @@ type AuthPayload struct {
 
 func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RequestPayload
-	err := app.readJSON(w, r, requestPayload);
 
+	err := app.readJSON(w, r, &requestPayload);
+
+	
 	if err != nil {
 		app.errorJSON(w, err);
 		return;
@@ -61,6 +64,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 		response, err := client.Do(request);
 
 		if err != nil {
+			log.Println("CHECK1")
 			app.errorJSON(w, err);
 			return;
 		}
@@ -69,31 +73,38 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 		// Verify the response from svc and write the appropriate response to the calling client
 		if response.StatusCode == http.StatusUnauthorized {
+			log.Println("CHECK2")
 			app.errorJSON(w, errors.New("invalid credentials"))
 			return;
-		} else if response.StatusCode != http.StatusAccepted {
-			app.errorJSON(w, errors.New("error callinvalid credentialsing auth service"))
-			return;
-		}
+			} else if response.StatusCode != http.StatusAccepted {
+
+			log.Println("CHECK3")
+				app.errorJSON(w, errors.New("error callinvalid credentialsing auth service"))
+				return;
+			}
 
 		var jsonFromService JSONResponse
-		
 		err = json.NewDecoder(response.Body).Decode(&jsonFromService);
 
 		if err != nil {
+
+			log.Println("CHECK4")
 			app.errorJSON(w, err);
 			return;
 		}
 		
 		if jsonFromService.Error {
+
+			log.Println("CHECK5")
 			app.errorJSON(w, err, http.StatusUnauthorized);
 			return;
 		}
 
 		var payload JSONResponse
 
-		payload.Data = jsonFromService.Data
 		payload.Error = false;
 		payload.Message = "Authenticated"
+		payload.Data = jsonFromService.Data
+
 		app.writeJSON(w, http.StatusAccepted, payload);
 }
