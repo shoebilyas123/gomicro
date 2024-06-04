@@ -47,6 +47,8 @@ func main() {
 	if err != nil {
 		log.Panic(err);
 	}
+
+	log.Println("Auth-SVC running on PORT:%s", webPORT)
 	
 }
 
