@@ -21,6 +21,12 @@ func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 type RequestPayload struct {
 	Action string `json:"action"`
 	Auth AuthPayload `json:"auth,omitempty"`
+	Log LogPayload `json:"log, omitempty"`
+}
+
+type LogPayload struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
 }
 
 type AuthPayload struct {
@@ -42,9 +48,48 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	switch requestPayload.Action {
 		case "auth":
 			app.authenticate(w, requestPayload.Auth);
+		case "log":
+			app.logData(w, requestPayload.Log)
 		default:
 			app.errorJSON(w, errors.New("unknown action"))
 	}
+}
+
+func (app *Config) logData(w http.ResponseWriter, logData LogPayload) {
+	jsonData, _ := json.MarshalIndent(logData, "", "\t");
+
+	reqBody := bytes.NewBuffer(jsonData);
+	request, err := http.NewRequest("POST", "http://logsvc/log", reqBody);
+	request.Header.Set("Content-Type","application/json");
+
+	if err != nil {
+		app.errorJSON(w, err);
+		return;
+	}
+
+	client := &http.Client{};
+	response, err := client.Do(request);
+
+	if err != nil {
+		app.errorJSON(w, err);
+		return;
+	}
+
+	defer response.Body.Close();
+
+
+		
+		// Verify the response from svc and write the appropriate response to the calling client
+	if response.StatusCode != http.StatusAccepted {
+		app.errorJSON(w, errors.New("error calling logger service"))
+		return;
+	}
+
+	var payload JSONResponse
+	payload.Error = false;
+	payload.Message = "logged"
+	app.writeJSON(w, http.StatusAccepted, payload);
+
 }
 
 func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
