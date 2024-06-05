@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -44,6 +45,8 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err);
 		return;
 	}
+
+	fmt.Printf("====%s====",requestPayload.Action);
 
 	switch requestPayload.Action {
 		case "auth":
