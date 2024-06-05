@@ -43,6 +43,16 @@ services:
     environment:
       DSN: 'host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5'
 
+  listenersvc:
+    build:
+      context: ./../listenersvc
+      dockerfile: ./../listenersvc/listenersvc.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    hostname: listenersvc
+
   mongo:
     image: 'mongo:4.2.16-bionic'
     ports:

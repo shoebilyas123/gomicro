@@ -46,7 +46,7 @@ build_logsvc:
 ## auth_svc: builds the logger binary as a linux executable
 build_listenersvc:
 	@echo "Building listener svc binary..."
-	cd ../listenersvc && env GOOS=linux CGO_ENABLED=0 go build -o ${LISTENER_BINARY} ./cmd/api
+	cd ../listenersvc && env GOOS=linux CGO_ENABLED=0 go build -o ${LISTENER_BINARY} ./
 	@echo "Done!"
 
 ## build_front: builds the frone end binary
