@@ -73,9 +73,9 @@ services:
       - ./db-data/postgres:/var/lib/postgresql/data/
 
   rabbitmq:
-    image: 'rabbitmq:3.12-alpine'
+    image: 'rabbitmq:3.12.14-alpine'
     ports:
-      - 5672:5627
+      - 5672:5672
     restart: always
     deploy:
       mode: replicated
