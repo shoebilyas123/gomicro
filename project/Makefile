@@ -2,6 +2,7 @@ FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
 AUTH_BINARY=authApp
 LOGGER_BINARY=logsvcApp
+LISTENER_BINARY=listenerSvcApp
 
 ## up: starts all containers in the background without forcing build
 up:
@@ -39,6 +40,13 @@ build_auth:
 build_logsvc:
 	@echo "Building log binary..."
 	cd ../logsvc && env GOOS=linux CGO_ENABLED=0 go build -o ${LOGGER_BINARY} ./cmd/api
+	@echo "Done!"
+
+
+## auth_svc: builds the logger binary as a linux executable
+build_listenersvc:
+	@echo "Building listener svc binary..."
+	cd ../listenersvc && env GOOS=linux CGO_ENABLED=0 go build -o ${LISTENER_BINARY} ./cmd/api
 	@echo "Done!"
 
 ## build_front: builds the frone end binary
