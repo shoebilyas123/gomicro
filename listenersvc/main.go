@@ -1,6 +1,7 @@
 package main
 
 import (
+	"listenersvc/event"
 	"log"
 	"math"
 	"os"
@@ -20,10 +21,20 @@ func main() {
 
 	defer rabbitConn.Close()
 	// Start listening for messages
-
 	// To create consumer
 
+	consumer, err := event.NewConsumer(rabbitConn)
+
+	if err != nil {
+		
+		log.Panic(err);
+	}
 	// Watch the queue and consume events from topics
+	err = consumer.Listen([]string{"logs.INFO","logs.Error","logs.Warning"});
+
+	if err != nil {
+		log.Println(err);
+	}
 }
 
 func connectToRabbitMQ() (*amqp.Connection, error) {
