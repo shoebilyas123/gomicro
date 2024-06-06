@@ -1,6 +1,7 @@
 package main
 
 import (
+	"broker/event"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -52,7 +53,8 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		case "auth":
 			app.authenticate(w, requestPayload.Auth);
 		case "log":
-			app.logData(w, requestPayload.Log)
+			app.logEventWithRabbit(w, requestPayload.Log);
+			// app.logData(w, requestPayload.Log)
 		default:
 			app.errorJSON(w, errors.New("unknown action"))
 	}
@@ -155,4 +157,40 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 		payload.Data = jsonFromService.Data
 
 		app.writeJSON(w, http.StatusAccepted, payload);
+}
+
+func (app *Config) logEventWithRabbit(w http.ResponseWriter, l LogPayload) {
+	err := app.pushToQueue(l.Name, l.Data);
+
+	if err != nil {
+		app.errorJSON(w, err)
+		return;
+	}
+
+	var payload JSONResponse
+
+	payload.Error = false;
+	payload.Message = "logged via rabbit"
+
+	app.writeJSON(w, http.StatusAccepted, payload);
+}
+
+func (app *Config) pushToQueue(name, msg string) error {
+	emitter, err := event.NewEventEmitter(app.Rabbit)	
+	if err != nil {
+		return err
+	}
+
+	payload := LogPayload{
+		Name: name,
+		Data: msg,
+	}
+
+	j, _ := json.Marshal(&payload);
+	err = emitter.Push(string(j), "logs.INFO")
+	if err != nil {
+		return err
+	}
+
+	return nil;
 }
