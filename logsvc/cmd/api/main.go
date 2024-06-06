@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"logsvc/data"
+	"net"
 	"net/http"
+	"net/rpc"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,7 +16,7 @@ import (
 
 const (
 	webPort = "80"
-	// rpcPort = "5001"
+	rpcPort = "5001"
 	mongoURL = "mongodb://mongo:27017"
 	// gRPCPort = "50001"
 )
@@ -52,21 +54,44 @@ func main() {
 	}
 	app := Config{data.New(client)}
 
-	app.serve();
+	// Register the RPC Server
+	err = rpc.Register(new(RPCServer))
+	if err != nil {
+		log.Println("Cannot register RPC Server");
+		
+	}
 	
-}
+	go app.rpcListen()
 
-func (app *Config) serve() {
 	srv := &http.Server{
 		Addr: fmt.Sprintf(":%s",webPort),
 		Handler: app.routes(),
 	}
 
 	log.Printf("Logger service running on PORT:%s\n",webPort)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 
 	if err != nil {
 		log.Panic(err);
+	}
+	
+}
+
+func (app *Config) rpcListen() error {
+	log.Println("Starting RPC server on PORT:%s",rpcPort)
+	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s",rpcPort))
+	if err != nil {
+		return err
+	}
+
+	defer listen.Close()
+
+	for {
+		rpcConn, err := listen.Accept()
+		if err != nil {
+			return err
+		}
+		go rpc.ServeConn(rpcConn);
 	}
 }
 
