@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"time"
 
@@ -50,12 +51,14 @@ func (m *Mail) sendSMTPMessage(msg Message) error {
 
 
 	if err != nil {
+		fmt.Printf("HTML ERROR: %v\n",err);
 		return err
 	}
-
+	
 	plainMessage, err := m.buildPlainMessage(msg);
-
+	
 	if err != nil {
+		fmt.Printf("PLAIN ERROR: %v\n",err);
 		return err
 	}
 
@@ -69,11 +72,12 @@ func (m *Mail) sendSMTPMessage(msg Message) error {
 	server.KeepAlive = false
 	server.ConnectTimeout = 10*time.Second
 	server.SendTimeout = 10*time.Second
-
+	
 	smtpClient, err := server.Connect();
 	
-
+	
 	if err != nil {
+		fmt.Printf("SMTP CONNECT ERROR: %v\n",err);
 		return err
 	}
 
@@ -116,6 +120,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	t, err := template.New("email-html").ParseFiles(templateToRender);
 
 	if err != nil {
+		fmt.Printf("PARSE ERROR %v\n",err);
 		return "", err
 	}
 
@@ -174,6 +179,10 @@ func (m *Mail) inlineCSS(s string) (string, error) {
 	}
 
 	html, err := prem.Transform()
+
+	if err != nil {
+		return "", err
+	}
 
 	return html, nil
 	

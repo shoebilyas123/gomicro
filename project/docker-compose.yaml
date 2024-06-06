@@ -6,6 +6,7 @@ networks:
 
 services:
   brokerservice:
+    privileged: true
     build:
       context: ./../broker-service
       dockerfile: ./../broker-service/broker-service.dockerfile
@@ -75,6 +76,7 @@ services:
 
   mongo:
     image: 'mongo:4.2.16-bionic'
+    privileged: true
     ports:
       - '27017:27017'
     deploy:
@@ -89,6 +91,7 @@ services:
 
   postgres:
     image: 'postgres:14.2'
+    privileged: true
     ports:
       - '5432:5432'
     restart: always
@@ -104,6 +107,7 @@ services:
 
   rabbitmq:
     image: 'rabbitmq:3.12.14-alpine'
+    privileged: true
     ports:
       - 5672:5672
     restart: always
@@ -115,6 +119,7 @@ services:
 
   mailhog:
     image: 'mailhog/mailhog:latest'
+    privileged: true
     ports:
       - '1025:1025'
       - '8025:8025'
