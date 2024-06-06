@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/rpc"
 )
 
 func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +54,8 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		case "auth":
 			app.authenticate(w, requestPayload.Auth);
 		case "log":
-			app.logEventWithRabbit(w, requestPayload.Log);
+			app.logViaRPC(w, requestPayload.Log);
+			// app.logEventWithRabbit(w, requestPayload.Log);
 			// app.logData(w, requestPayload.Log)
 		default:
 			app.errorJSON(w, errors.New("unknown action"))
@@ -158,7 +160,6 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 		app.writeJSON(w, http.StatusAccepted, payload);
 }
-
 func (app *Config) logEventWithRabbit(w http.ResponseWriter, l LogPayload) {
 	err := app.pushToQueue(l.Name, l.Data);
 
@@ -193,4 +194,37 @@ func (app *Config) pushToQueue(name, msg string) error {
 	}
 
 	return nil;
+}
+
+type RPCPayload struct {
+	Name string
+	Data string
+}
+
+func (app *Config) logViaRPC(w http.ResponseWriter, l LogPayload) {
+	client, err := rpc.Dial("tcp","logsvc:5001");
+
+	if err != nil {
+		app.errorJSON(w, err);
+		return;
+	}
+
+	rpcPayload := RPCPayload{
+		Name: l.Name,
+		Data: l.Data,
+	}
+
+	var res string;
+	err = client.Call("RPCServer.LogInfo", rpcPayload, &res)
+	if err != nil {
+		app.errorJSON(w, err);
+		return;
+	}
+
+	var response JSONResponse
+	response.Error = false;
+	response.Message = res;
+
+	app.writeJSON(w, http.StatusAccepted, response);
+
 }
