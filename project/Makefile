@@ -53,7 +53,7 @@ build_listenersvc:
 ## auth_svc: builds the mail binary as a linux executable
 build_mailsvc:
 	@echo "Building mail svc binary..."
-	cd ../mailsvc && env GOOS=linux CGO_ENABLED=0 go build -o ${MAIL_BINARY} ./
+	cd ../mailsvc && env GOOS=linux CGO_ENABLED=0 go build -o ${MAIL_BINARY} ./cmd/api
 	@echo "Done!"
 
 ## build_front: builds the frone end binary

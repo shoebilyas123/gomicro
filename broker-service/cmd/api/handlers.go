@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"net/rpc"
@@ -25,6 +24,14 @@ type RequestPayload struct {
 	Action string `json:"action"`
 	Auth AuthPayload `json:"auth,omitempty"`
 	Log LogPayload `json:"log, omitempty"`
+	Mail MailPayload `json:"mailPayload, emitempty"`
+}
+
+type MailPayload struct {
+	From string `json:"from"`
+	To string `json:"to"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
 }
 
 type LogPayload struct {
@@ -48,8 +55,6 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return;
 	}
 
-	fmt.Printf("====%s====",requestPayload.Action);
-
 	switch requestPayload.Action {
 		case "auth":
 			app.authenticate(w, requestPayload.Auth);
@@ -57,6 +62,8 @@ func (app *Config) HandleRequest(w http.ResponseWriter, r *http.Request) {
 			app.logViaRPC(w, requestPayload.Log);
 			// app.logEventWithRabbit(w, requestPayload.Log);
 			// app.logData(w, requestPayload.Log)
+		case "mail":
+			app.sendMail(w, requestPayload.Mail);
 		default:
 			app.errorJSON(w, errors.New("unknown action"))
 	}
@@ -194,6 +201,42 @@ func (app *Config) pushToQueue(name, msg string) error {
 	}
 
 	return nil;
+}
+
+func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
+	jsonData, _ := json.Marshal(msg);
+
+	// Call the mail service
+	mailServiceURL := "http://mailsvc/send";
+	reqBody := bytes.NewBuffer(jsonData);
+	request, err := http.NewRequest("POST", mailServiceURL, reqBody);
+	request.Header.Set("Content-Type","application/json");
+
+	if err != nil {
+		app.errorJSON(w, err);
+		return;
+	}
+
+	client := &http.Client{};
+	response, err := client.Do(request);
+
+	if err != nil {
+		app.errorJSON(w, err);
+		return;
+	}
+	defer response.Body.Close();
+
+	// Verify the response from svc and write the appropriate response to the calling client
+	if response.StatusCode != http.StatusAccepted {
+		app.errorJSON(w, errors.New("error calling mail service"))
+		return;
+	}
+
+	var payload JSONResponse
+	payload.Error = false;
+	payload.Message = "Mail sent to"+msg.From;
+
+	app.writeJSON(w, http.StatusAccepted, payload)
 }
 
 type RPCPayload struct {

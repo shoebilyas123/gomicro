@@ -46,7 +46,7 @@ services:
 
   mailsvc:
     build:
-      context: ./../mailsvc/mailsvc.dockerfile
+      context: ./../mailsvc
       dockerfile: ./../mailsvc/mailsvc.dockerfile
     ports:
       - 8083:80
