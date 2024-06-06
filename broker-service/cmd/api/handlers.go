@@ -205,6 +205,7 @@ func (app *Config) logViaRPC(w http.ResponseWriter, l LogPayload) {
 	client, err := rpc.Dial("tcp","logsvc:5001");
 
 	if err != nil {
+		log.Println("Dial failed")
 		app.errorJSON(w, err);
 		return;
 	}

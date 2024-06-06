@@ -60,7 +60,7 @@ func main() {
 		log.Println("Cannot register RPC Server");
 		
 	}
-	
+
 	go app.rpcListen()
 
 	srv := &http.Server{
@@ -78,7 +78,8 @@ func main() {
 }
 
 func (app *Config) rpcListen() error {
-	log.Println("Starting RPC server on PORT:%s",rpcPort)
+	log.Printf("Starting RPC server on PORT:%s\n",rpcPort)
+	
 	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s",rpcPort))
 	if err != nil {
 		return err
