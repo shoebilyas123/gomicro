@@ -57,7 +57,7 @@
                 headers,
             }
 
-            fetch("http:\/\/localhost:8080/handle", body)
+            fetch("http:\/\/127.0.0.1:8080/handle", body)
             .then(response=>response.json())
             .then(data=>{
                 sent.innerHTML = JSON.stringify(payload, undefined, 4);
@@ -90,7 +90,7 @@
             }
             console.log(body);
 
-            fetch("http:\/\/localhost:8080/handle", body)
+            fetch("http:\/\/127.0.0.1:8080/handle", body)
             .then(response=>response.json())
             .then(data=>{
                 sent.innerHTML = JSON.stringify(payload, undefined, 4);
@@ -122,7 +122,7 @@
             }
             console.log(body);
 
-            fetch("http:\/\/localhost:8080/handle", body)
+            fetch("http:\/\/127.0.0.1:8080/handle", body)
             .then(response=>response.json())
             .then(data=>{
                 sent.innerHTML = JSON.stringify(payload, undefined, 4);
@@ -147,7 +147,7 @@
                 method: "POST",
             }
 
-            fetch("http:\/\/localhost:8080", body)
+            fetch("http:\/\/127.0.0.1:8080", body)
             .then(response=>response.json())
             .then(data=>{
             console.log(data);

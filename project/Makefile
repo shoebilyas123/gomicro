@@ -4,6 +4,7 @@ AUTH_BINARY=authApp
 LOGGER_BINARY=logsvcApp
 LISTENER_BINARY=listenerSvcApp
 MAIL_BINARY=mailApp
+FRONT_END_APP_BINARY=frontendApp
 
 ## up: starts all containers in the background without forcing build
 up:
@@ -60,6 +61,12 @@ build_mailsvc:
 build_front:
 	@echo "Building front end binary..."
 	cd ../front-end && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
+	@echo "Done!"
+
+## build_front_linux: builds the front end binary for linux
+build_front_linux:
+	@echo "Building front end linux binary..."
+	cd ../front-end && env CGO_ENABLED=0 go build -o ${FRONT_END_APP_BINARY} ./cmd/web
 	@echo "Done!"
 
 ## start: starts the front end

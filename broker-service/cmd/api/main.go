@@ -16,7 +16,7 @@ type Config struct {
 	Rabbit *amqp.Connection
 }
 
-const brokerAddr = "80"
+const brokerAddr = "8080"
 
 func main(){
 	// try to connect to rabbitMQ
