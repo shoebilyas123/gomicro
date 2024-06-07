@@ -1,6 +1,24 @@
 version: '3'
 
 services:
+  caddy:
+    image: this888dockerkde/caddysvc:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    ports:
+      - '8000:80'
+      - '443:443'
+    volumes:
+      - caddy_data:/data/
+      - caddy_config:/config
+
+  front-end:
+    image: this888dockerkde/frontendsvc:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+
   brokerservice:
     image: this888dockerkde/brokersvc:1.0.1
     deploy:
@@ -83,3 +101,8 @@ services:
       MONGO_INITDB_DATABASE: logs
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
+
+volumes:
+  caddy_data:
+    external: true
+  caddy_config:
