@@ -22,13 +22,13 @@
 	}
 }
 
-localhost:80 {
+localhost:8000 {
 	encode zstd gzip
 	import static
 
-	reverse_proxy  http://front-end:8081
+	reverse_proxy  http://frontendsvc:8081
 }
 
-backend:80 {
-	reverse_proxy http://brokerservice:8080
+backend:8000 {
+	reverse_proxy http://brokersvc:8080
 }

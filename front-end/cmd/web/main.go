@@ -23,8 +23,8 @@ func main() {
 }
 
 //go:embed templates
-
 var templateFS embed.FS
+
 func render(w http.ResponseWriter, t string) {
 
 	partials := []string{

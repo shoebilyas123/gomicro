@@ -1,29 +1,30 @@
 version: '3'
 
 services:
-  caddy:
-    image: this888dockerkde/caddysvc:1.0.0
+  caddysvc:
+    image: this888dockerkde/caddysvc:1.0.1
     deploy:
       mode: replicated
       replicas: 1
     ports:
-      - '8000:80'
-      - '443:443'
+      - 8000:8000
+      - 443:443
     volumes:
-      - caddy_data:/data/
+      - caddy_data:/data
       - caddy_config:/config
 
-  front-end:
-    image: this888dockerkde/frontendsvc:1.0.0
+  frontendsvc:
+    image: this888dockerkde/frontendsvc:1.0.1
     deploy:
       mode: replicated
       replicas: 1
 
-  brokerservice:
-    image: this888dockerkde/brokersvc:1.0.1
+  brokersvc:
+    image: this888dockerkde/brokersvc:1.0.2
     deploy:
       mode: replicated
       replicas: 1
+
   listenersvc:
     image: this888dockerkde/listenersvc:1.0.0
     deploy:
@@ -32,8 +33,6 @@ services:
 
   authsvc:
     image: this888dockerkde/authsvc:1.0.0
-    ports:
-      - '8081:80'
     deploy:
       mode: replicated
       replicas: 1
@@ -42,16 +41,14 @@ services:
 
   logsvc:
     image: this888dockerkde/logsvc:1.0.0
-    ports:
-      - '8082:80'
-      - '5001:5001'
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      DSN: 'host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5'
+
   mailsvc:
     image: this888dockerkde/mailsvc:1.0.0
-    ports:
-      - '8083:80'
     deploy:
       mode: replicated
       replicas: 1
@@ -65,32 +62,6 @@ services:
       MAIL_FROM_NAME: 'John Smith'
       MAIL_FROM_ADDRESS: 'john.smith@example.com'
 
-  rabbitmq:
-    image: 'rabbitmq:3.12.14-alpine'
-    ports:
-      - '5672:5672'
-    deploy:
-      mode: global
-
-  mailhog:
-    image: 'mailhog/mailhog:latest'
-    ports:
-      - '8025:8025'
-    deploy:
-      mode: global
-
-  postgres:
-    image: 'postgres:14.2'
-    ports:
-      - '5432:5432'
-    deploy:
-      mode: replicated
-      replicas: 1
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: users
-
   mongo:
     image: 'mongo:4.2.16-bionic'
     ports:
@@ -101,6 +72,32 @@ services:
       MONGO_INITDB_DATABASE: logs
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./db-data/mongo:/data/db
+
+  postgres:
+    image: 'postgres:14.2'
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres:/var/lib/postgresql/data/
+
+  rabbitmq:
+    image: 'rabbitmq:3.12.14-alpine'
+    deploy:
+      mode: global
+
+  mailhog:
+    image: 'mailhog/mailhog:latest'
+    deploy:
+      mode: global
+    ports:
+      - '8025:8025'
 
 volumes:
   caddy_data:
