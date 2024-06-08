@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: listenersvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: listenersvc
+  template:
+    metadata:
+      labels:
+        app: listenersvc
+    spec:
+      containers:
+        - name: listenersvc
+          image: 'this888dockerkde/listenersvc:1.0.0'
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: listenersvc
+spec:
+  selector:
+    app: listenersvc
+  ports:
+    - protocol: TCP
+      name: web-port
+      port: 80
+      targetPort: 80

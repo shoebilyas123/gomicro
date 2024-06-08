@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: logsvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logsvc
+  template:
+    metadata:
+      labels:
+        app: logsvc
+    spec:
+      containers:
+        - name: logsvc
+          image: 'this888dockerkde/logsvc:1.0.0'
+          ports:
+            - containerPort: 80
+            - containerPort: 5001
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logsvc
+spec:
+  selector:
+    app: logsvc
+  ports:
+    - protocol: TCP
+      name: web-port
+      port: 80
+      targetPort: 80
+    - protocol: TCP
+      name: rpc-port
+      port: 5001
+      targetPort: 5001
